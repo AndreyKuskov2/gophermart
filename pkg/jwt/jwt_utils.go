@@ -42,15 +42,12 @@ func GetJwtClaims(r *http.Request) (*JWTClaims, error) {
   return claims, nil
 }
 
-func CreateJwtToken(JwtSecretToken string, JwtTimeExpired time.Duration, userId int64, username string, roles []string) (string, error) {
-  if len(roles) == 0 {
-    roles = make([]string, 0)
-  }
+func CreateJwtToken(JwtSecretToken string, JwtTimeExpired time.Duration, userID int64, username string) (string, error) {
   claims := JWTClaims{
     username,
     jwtlib.RegisteredClaims{
       ExpiresAt: jwtlib.NewNumericDate(time.Now().Add(JwtTimeExpired)),
-      Subject:   strconv.FormatInt(userId, 10),
+      Subject:   strconv.FormatInt(userID, 10),
     },
   }
   token := jwtlib.NewWithClaims(jwtlib.SigningMethodHS256, claims)
