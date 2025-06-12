@@ -29,7 +29,7 @@ func NewConfig(log *logger.Logger) (*Config, error) {
 
 	for _, arg := range pflag.Args() {
 		if !strings.HasPrefix(arg, "-") {
-			return nil, fmt.Errorf("Unknown flag: %v", arg)
+			return nil, fmt.Errorf("unknown flag: %v", arg)
 		}
 	}
 
