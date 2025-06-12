@@ -10,6 +10,12 @@ import (
 	"github.com/go-chi/render"
 )
 
+type contextKey string
+
+const (
+	contextClaims contextKey = "claims"
+)
+
 func JwtAuthValidator(cfg *config.Config, log *logger.Logger) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -29,7 +35,7 @@ func JwtAuthValidator(cfg *config.Config, log *logger.Logger) func(next http.Han
 				return
 			}
 
-			r = r.Clone(context.WithValue(r.Context(), "claims", claims))
+			r = r.Clone(context.WithValue(r.Context(), contextClaims, claims))
 			next.ServeHTTP(w, r)
 		})
 	}
