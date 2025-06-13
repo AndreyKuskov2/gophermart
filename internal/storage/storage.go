@@ -61,7 +61,7 @@ func (db *Postgres) CreateUser(user models.UserCreditials) error {
 
 	var userID int
 	if err := db.DB.QueryRow(db.Ctx, checkUserIsExists, user.Login).Scan(&userID); err == nil {
-		return UserIsExist
+		return ErrUserIsExist
 	}
 
 	if _, err := db.DB.Exec(db.Ctx, createNewUser, user.Login, string(passwordHash)); err != nil {
@@ -80,7 +80,7 @@ func (db *Postgres) GetUserByLogin(user models.UserCreditials) error {
 
 	err := bcrypt.CompareHashAndPassword([]byte(passwordHash), []byte(user.Password))
 	if err != nil {
-		return InvalidData
+		return ErrInvalidData
 	}
 	return nil
 }

@@ -44,7 +44,7 @@ func (gh *GophermartHandlers) RegisterUserHandler(w http.ResponseWriter, r *http
 
 	if err := gh.service.RegisterUserService(user); err != nil {
 		gh.log.Log.Info(err.Error())
-		if errors.Is(err, storage.UserIsExist) {
+		if errors.Is(err, storage.ErrUserIsExist) {
 			render.Status(r, http.StatusConflict)
 			render.PlainText(w, r, "")
 			return
@@ -79,7 +79,7 @@ func (gh *GophermartHandlers) LoginUserHandler(w http.ResponseWriter, r *http.Re
 
 	if err := gh.service.GetUserService(user); err != nil {
 		gh.log.Log.Info(err.Error())
-		if errors.Is(err, sql.ErrNoRows) || errors.Is(err, storage.InvalidData) {
+		if errors.Is(err, sql.ErrNoRows) || errors.Is(err, storage.ErrInvalidData) {
 			render.Status(r, http.StatusUnauthorized)
 			render.PlainText(w, r, "")
 			return
