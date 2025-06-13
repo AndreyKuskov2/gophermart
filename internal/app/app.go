@@ -9,19 +9,22 @@ import (
 	"time"
 
 	"github.com/AndreyKuskov2/gophermart/internal/config"
+	"github.com/AndreyKuskov2/gophermart/internal/storage"
 	"github.com/AndreyKuskov2/gophermart/pkg/logger"
 	"go.uber.org/zap"
 )
 
 type App struct {
-	Cfg *config.Config
-	Log *logger.Logger
+	Cfg     *config.Config
+	Log     *logger.Logger
+	Storage *storage.Postgres
 }
 
-func NewApp(cfg *config.Config, log *logger.Logger) *App {
+func NewApp(cfg *config.Config, log *logger.Logger, storage *storage.Postgres) *App {
 	return &App{
-		Cfg: cfg,
-		Log: log,
+		Cfg:     cfg,
+		Log:     log,
+		Storage: storage,
 	}
 }
 

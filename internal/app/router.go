@@ -3,6 +3,7 @@ package app
 import (
 	"github.com/AndreyKuskov2/gophermart/internal/app/middlewares"
 	"github.com/AndreyKuskov2/gophermart/internal/handlers"
+	"github.com/AndreyKuskov2/gophermart/internal/service"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 )
@@ -15,7 +16,8 @@ func (app *App) GophermartRouter() chi.Router {
 	router.Use(middlewares.LoggerMiddleware(app.Log))
 	router.Use(middleware.Recoverer)
 
-	h := handlers.NewGophermartHandlers(nil, app.Cfg, app.Log)
+	s := service.NewGophermartService(app.Storage, app.Log)
+	h := handlers.NewGophermartHandlers(s, app.Cfg, app.Log)
 
 	router.Route("/api/user", func(r chi.Router) {
 		r.Post("/register", h.RegisterUserHandler)
