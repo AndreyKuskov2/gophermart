@@ -37,7 +37,7 @@ type Balance struct {
 
 type WithdrawBalanceRequest struct {
 	Order string `json:"order"`
-	Sum   int    `json:"sum"`
+	Sum   float32    `json:"sum"`
 }
 
 func (uc *WithdrawBalanceRequest) Bind(r *http.Request) error {
