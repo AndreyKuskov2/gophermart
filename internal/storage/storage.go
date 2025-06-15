@@ -150,3 +150,24 @@ func (db *Postgres) GetWithdrawalByUserID(userID string) ([]models.WithdrawBalan
 	}
 	return withdrawBalance, nil
 }
+
+func (db *Postgres) GetPendingOrders() ([]models.Orders, error) {
+	rows, err := db.DB.Query(db.Ctx, getPendingOrders, "NEW", "PROCESSING")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	orders, err := pgx.CollectRows(rows, pgx.RowToStructByName[models.Orders])
+	if err != nil {
+		return nil, err
+	}
+	return orders, nil
+}
+
+func (db *Postgres) UpdateOrderStatus(orderNumber, status string, accrual *int) error {
+	if _, err := db.DB.Exec(db.Ctx, updateOrderStatus, status, accrual, orderNumber); err != nil {
+		return err
+	}
+	return nil
+}

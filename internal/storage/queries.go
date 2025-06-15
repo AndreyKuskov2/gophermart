@@ -18,4 +18,6 @@ const (
 	  (SELECT SUM(amount) AS withdrawn_sum FROM withdrawals WHERE user_id = $1) w`
 	createWithdraw        = "INSERT INTO withdrawals(user_id, order_number, amount) VALUES ($1, $2, $3);"
 	getWithdrawalByUserID = "SELECT * FROM withdrawals WHERE user_id = $1;"
+	getPendingOrders      = "SELECT * FROM orders WHERE status IN ($1, $2);"
+	updateOrderStatus     = "UPDATE orders SET status = $1, accrual = $2 WHERE number = $3;"
 )

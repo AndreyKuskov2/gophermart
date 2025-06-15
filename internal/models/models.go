@@ -57,3 +57,9 @@ type WithdrawBalance struct {
 	Amount      int       `json:"sum"`
 	ProcessedAt time.Time `json:"processed_at"`
 }
+
+type AccrualResponse struct {
+	Order   string `json:"order"`
+	Status  string `json:"status"`
+	Accrual int    `json:"accrual,omitempty"`
+}
