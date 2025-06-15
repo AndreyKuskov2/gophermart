@@ -3,6 +3,7 @@ package models
 import (
 	"fmt"
 	"net/http"
+	"time"
 )
 
 type UserCreditials struct {
@@ -18,4 +19,18 @@ func (uc *UserCreditials) Bind(r *http.Request) error {
 		return fmt.Errorf("password field is required")
 	}
 	return nil
+}
+
+type Orders struct {
+	OrderID    int       `json:"order_id"`
+	Number     string    `json:"number"`
+	Status     string    `json:"status"`
+	Accrual    int       `json:"accrual"`
+	UploadedAt time.Time `json:"uploaded_at"`
+	UserID     int       `json:"user_id"`
+}
+
+type Balance struct {
+	Current float64 `json:"current"`
+	Withdrawn int `json:"withdrawn"`
 }

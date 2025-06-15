@@ -10,6 +10,7 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/database/pgx/v5"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jackc/pgx/v5/stdlib"
 	"golang.org/x/crypto/bcrypt"
@@ -53,34 +54,78 @@ func NewPostgres(ctx context.Context, dbURI string) (*Postgres, error) {
 	}, nil
 }
 
-func (db *Postgres) CreateUser(user models.UserCreditials) error {
+func (db *Postgres) CreateUser(user models.UserCreditials) (int, error) {
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(user.Password), 14)
 	if err != nil {
-		return fmt.Errorf("cannot hashing password: %v", err)
+		return 0, fmt.Errorf("cannot hashing password: %v", err)
 	}
 
 	var userID int
 	if err := db.DB.QueryRow(db.Ctx, checkUserIsExists, user.Login).Scan(&userID); err == nil {
-		return ErrUserIsExist
+		return 0, ErrUserIsExist
 	}
 
-	if _, err := db.DB.Exec(db.Ctx, createNewUser, user.Login, string(passwordHash)); err != nil {
+	if err := db.DB.QueryRow(db.Ctx, createNewUser, user.Login, string(passwordHash)).Scan(&userID); err != nil {
 		fmt.Println(err)
-		return fmt.Errorf("cannot create user: %v", err)
+		return 0, fmt.Errorf("cannot create user: %v", err)
 	}
-	return nil
+	return userID, nil
 }
 
-func (db *Postgres) GetUserByLogin(user models.UserCreditials) error {
+func (db *Postgres) GetUserByLogin(user models.UserCreditials) (int, error) {
+	var userID int
 	var passwordHash string
 
-	if err := db.DB.QueryRow(db.Ctx, getUserPasswordByLogin, user.Login).Scan(&passwordHash); err != nil {
-		return fmt.Errorf("user not found: %v", err)
+	if err := db.DB.QueryRow(db.Ctx, getUserPasswordByLogin, user.Login).Scan(&userID, &passwordHash); err != nil {
+		return 0, fmt.Errorf("user not found: %v", err)
 	}
 
 	err := bcrypt.CompareHashAndPassword([]byte(passwordHash), []byte(user.Password))
 	if err != nil {
-		return ErrInvalidData
+		return 0, ErrInvalidData
+	}
+	return userID, nil
+}
+
+func (db *Postgres) GetOrderByNumber(orderNumber string) (*models.Orders, error) {
+	rows, err := db.DB.Query(db.Ctx, getOrderByNumber, orderNumber)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	order, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.Orders])
+	if err != nil {
+		return nil, err
+	}
+	return &order, nil
+}
+
+func (db *Postgres) CreateNewOrder(order *models.Orders) error {
+	if _, err := db.DB.Exec(db.Ctx, createOrder, order.Number, order.Status, order.Accrual, order.UserID); err != nil {
+		return err
 	}
 	return nil
+}
+
+func (db *Postgres) GetOrdersByUserID(userID string) ([]models.Orders, error) {
+	rows, err := db.DB.Query(db.Ctx, getOrdersByUserID, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	orders, err := pgx.CollectRows(rows, pgx.RowToStructByName[models.Orders])
+	if err != nil {
+		return nil, err
+	}
+	return orders, nil
+}
+
+func (db *Postgres) GetUserBalance(userID string) (*models.Balance, error) {
+	var balance models.Balance
+	if err := db.DB.QueryRow(db.Ctx, getUserBalance, userID, "PROCESSED").Scan(&balance.Current, &balance.Withdrawn); err != nil {
+		return nil, err
+	}
+	return &balance, nil
 }

@@ -13,7 +13,7 @@ import (
 type contextKey string
 
 const (
-	contextClaims contextKey = "claims"
+	ContextClaims contextKey = "claims"
 )
 
 func JwtAuthValidator(cfg *config.Config, log *logger.Logger) func(next http.Handler) http.Handler {
@@ -26,7 +26,6 @@ func JwtAuthValidator(cfg *config.Config, log *logger.Logger) func(next http.Han
 				render.PlainText(w, r, "no authorization token")
 				return
 			}
-			tokenString = tokenString[len("Bearer "):]
 			claims, err := jwt.VerifyToken(tokenString, cfg.JWTSecretToken)
 			if err != nil {
 				log.Log.Error(err.Error())
@@ -35,7 +34,7 @@ func JwtAuthValidator(cfg *config.Config, log *logger.Logger) func(next http.Han
 				return
 			}
 
-			r = r.Clone(context.WithValue(r.Context(), contextClaims, claims))
+			r = r.Clone(context.WithValue(r.Context(), ContextClaims, claims))
 			next.ServeHTTP(w, r)
 		})
 	}

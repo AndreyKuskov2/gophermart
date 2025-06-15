@@ -3,6 +3,7 @@ package jwt
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	jwtlib "github.com/golang-jwt/jwt/v5"
@@ -40,11 +41,11 @@ func GetJwtClaims(r *http.Request) (*JWTClaims, error) {
 	return claims, nil
 }
 
-func CreateJwtToken(JwtSecretToken string, username string) (string, error) {
+func CreateJwtToken(JwtSecretToken string, userID int) (string, error) {
 	claims := JWTClaims{
 		jwtlib.RegisteredClaims{
 			ExpiresAt: jwtlib.NewNumericDate(time.Now().Add(time.Duration(3600 * time.Second))),
-			Subject:   username,
+			Subject:   strconv.Itoa(userID),
 		},
 	}
 	token := jwtlib.NewWithClaims(jwtlib.SigningMethodHS256, claims)
