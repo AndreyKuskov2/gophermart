@@ -24,6 +24,8 @@ type IGophermartService interface {
 	CreateNewOrderService(orderNumber string, userID string) error
 	GetOrdersService(userID string) ([]models.Orders, error)
 	GetUserBalanceService(userID string) (*models.Balance, error)
+	WithdrawBalanceService(userID string, withdrawBalance *models.WithdrawBalanceRequest) error
+	GetWithdrawalService(userID string) ([]models.WithdrawBalance, error)
 }
 
 type GophermartHandlers struct {
@@ -198,25 +200,59 @@ func (gh *GophermartHandlers) GetBalanceHandler(w http.ResponseWriter, r *http.R
 }
 
 func (gh *GophermartHandlers) WithdrawBalanceHandler(w http.ResponseWriter, r *http.Request) {
-	// claims, ok := r.Context().Value(middlewares.ContextClaims).(*jwt.JWTClaims)
-	// if !ok {
-	// 	gh.log.Log.Info("cannot get jwt claims")
-	// 	render.Status(r, http.StatusBadRequest)
-	// 	render.PlainText(w, r, "")
-	// 	return
-	// }
+	claims, ok := r.Context().Value(middlewares.ContextClaims).(*jwt.JWTClaims)
+	if !ok {
+		gh.log.Log.Info("cannot get jwt claims")
+		render.Status(r, http.StatusBadRequest)
+		render.PlainText(w, r, "")
+		return
+	}
 
-	// var withdrawBalance models.WithdrawBalanceRequest
-	// if err := render.Bind(r, &withdrawBalance); err != nil {
-	// 	gh.log.Log.Info("cannot parse body")
-	// 	render.Status(r, http.StatusBadRequest)
-	// 	render.PlainText(w, r, "")
-	// 	return
-	// }
+	var withdrawBalance models.WithdrawBalanceRequest
+	if err := render.Bind(r, &withdrawBalance); err != nil {
+		gh.log.Log.Info("cannot parse body")
+		render.Status(r, http.StatusBadRequest)
+		render.PlainText(w, r, "")
+		return
+	}
 
-	render.PlainText(w, r, "pong")
+	if err := gh.service.WithdrawBalanceService(claims.Subject, &withdrawBalance); err != nil {
+		gh.log.Log.Info("failed to withdraw balance", zap.Error(err))
+		switch {
+		case errors.Is(err, service.ErrInvalidWithdrawSum):
+			w.WriteHeader(http.StatusPaymentRequired)
+			return
+		case errors.Is(err, service.ErrNumberIsNotCorrect):
+			w.WriteHeader(http.StatusUnprocessableEntity)
+			return
+		default:
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	}
 }
 
 func (gh *GophermartHandlers) WithdrawAlsHandler(w http.ResponseWriter, r *http.Request) {
-	render.PlainText(w, r, "pong")
+	claims, ok := r.Context().Value(middlewares.ContextClaims).(*jwt.JWTClaims)
+	if !ok {
+		gh.log.Log.Info("cannot get jwt claims")
+		render.Status(r, http.StatusBadRequest)
+		render.PlainText(w, r, "")
+		return
+	}
+
+	withdrawAls, err := gh.service.GetWithdrawalService(claims.Subject)
+	if err != nil {
+		gh.log.Log.Info(err.Error())
+		if errors.Is(err, sql.ErrNoRows) {
+			render.Status(r, http.StatusNoContent)
+			render.PlainText(w, r, "")
+			return
+		}
+		render.Status(r, http.StatusInternalServerError)
+		render.PlainText(w, r, "")
+	}
+
+	render.Status(r, http.StatusOK)
+	render.JSON(w, r, withdrawAls)
 }

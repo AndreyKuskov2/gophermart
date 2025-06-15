@@ -16,4 +16,6 @@ const (
 	FROM
 	  (SELECT SUM(accrual) AS accrual_sum FROM orders WHERE user_id = $1 AND status = $2) o,
 	  (SELECT SUM(amount) AS withdrawn_sum FROM withdrawals WHERE user_id = $1) w`
+	createWithdraw        = "INSERT INTO withdrawals(user_id, order_number, amount) VALUES ($1, $2, $3);"
+	getWithdrawalByUserID = "SELECT * FROM withdrawals WHERE user_id = $1;"
 )

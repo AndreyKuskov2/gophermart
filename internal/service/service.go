@@ -18,6 +18,8 @@ type IGophermartStorage interface {
 	CreateNewOrder(order *models.Orders) error
 	GetOrdersByUserID(userID string) ([]models.Orders, error)
 	GetUserBalance(userID string) (*models.Balance, error)
+	CreateWithdrawal(withdrawal *models.WithdrawBalance) error
+	GetWithdrawalByUserID(userID string) ([]models.WithdrawBalance, error)
 }
 
 type GophermartService struct {
@@ -81,4 +83,35 @@ func (gs *GophermartService) GetOrdersService(userID string) ([]models.Orders, e
 
 func (gs *GophermartService) GetUserBalanceService(userID string) (*models.Balance, error) {
 	return gs.storage.GetUserBalance(userID)
+}
+
+func (gs *GophermartService) WithdrawBalanceService(userID string, withdrawBalance *models.WithdrawBalanceRequest) error {
+	if !utils.LuhnAlgorith(withdrawBalance.Order) {
+		gs.log.Log.Info(ErrNumberIsNotCorrect.Error())
+		return ErrNumberIsNotCorrect
+	}
+
+	balance, err := gs.storage.GetUserBalance(userID)
+	if err != nil {
+		return err
+	}
+
+	if balance.Current < float64(withdrawBalance.Sum) {
+		return ErrInvalidWithdrawSum
+	}
+
+	withdrawal := &models.WithdrawBalance{
+		UserID:      userID,
+		OrderNumber: withdrawBalance.Order,
+		Amount:      withdrawBalance.Sum,
+	}
+	if err := gs.storage.CreateWithdrawal(withdrawal); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (gs *GophermartService) GetWithdrawalService(userID string) ([]models.WithdrawBalance, error) {
+	return gs.storage.GetWithdrawalByUserID(userID)
 }

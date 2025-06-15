@@ -49,3 +49,11 @@ func (uc *WithdrawBalanceRequest) Bind(r *http.Request) error {
 	}
 	return nil
 }
+
+type WithdrawBalance struct {
+	ID          int       `json:"-"`
+	UserID      string    `json:"-"`
+	OrderNumber string    `json:"order"`
+	Amount      int       `json:"sum"`
+	ProcessedAt time.Time `json:"processed_at"`
+}

@@ -129,3 +129,24 @@ func (db *Postgres) GetUserBalance(userID string) (*models.Balance, error) {
 	}
 	return &balance, nil
 }
+
+func (db *Postgres) CreateWithdrawal(withdrawal *models.WithdrawBalance) error {
+	if _, err := db.DB.Exec(db.Ctx, createWithdraw, withdrawal.UserID, withdrawal.OrderNumber, withdrawal.Amount); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (db *Postgres) GetWithdrawalByUserID(userID string) ([]models.WithdrawBalance, error) {
+	rows, err := db.DB.Query(db.Ctx, getWithdrawalByUserID, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	withdrawBalance, err := pgx.CollectRows(rows, pgx.RowToStructByName[models.WithdrawBalance])
+	if err != nil {
+		return nil, err
+	}
+	return withdrawBalance, nil
+}
