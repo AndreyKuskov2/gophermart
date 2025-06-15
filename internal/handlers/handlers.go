@@ -198,6 +198,22 @@ func (gh *GophermartHandlers) GetBalanceHandler(w http.ResponseWriter, r *http.R
 }
 
 func (gh *GophermartHandlers) WithdrawBalanceHandler(w http.ResponseWriter, r *http.Request) {
+	// claims, ok := r.Context().Value(middlewares.ContextClaims).(*jwt.JWTClaims)
+	// if !ok {
+	// 	gh.log.Log.Info("cannot get jwt claims")
+	// 	render.Status(r, http.StatusBadRequest)
+	// 	render.PlainText(w, r, "")
+	// 	return
+	// }
+
+	// var withdrawBalance models.WithdrawBalanceRequest
+	// if err := render.Bind(r, &withdrawBalance); err != nil {
+	// 	gh.log.Log.Info("cannot parse body")
+	// 	render.Status(r, http.StatusBadRequest)
+	// 	render.PlainText(w, r, "")
+	// 	return
+	// }
+
 	render.PlainText(w, r, "pong")
 }
 

@@ -22,7 +22,7 @@ func JwtAuthValidator(cfg *config.Config, log *logger.Logger) func(next http.Han
 			tokenString := r.Header.Get("Authorization")
 			if tokenString == "" {
 				log.Log.Error("no authorization token")
-				render.Status(r, http.StatusBadRequest)
+				render.Status(r, http.StatusUnauthorized)
 				render.PlainText(w, r, "no authorization token")
 				return
 			}

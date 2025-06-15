@@ -31,6 +31,21 @@ type Orders struct {
 }
 
 type Balance struct {
-	Current float64 `json:"current"`
-	Withdrawn int `json:"withdrawn"`
+	Current   float64 `json:"current"`
+	Withdrawn int     `json:"withdrawn"`
+}
+
+type WithdrawBalanceRequest struct {
+	Order string `json:"order"`
+	Sum   int    `json:"sum"`
+}
+
+func (uc *WithdrawBalanceRequest) Bind(r *http.Request) error {
+	if uc.Order == "" {
+		return fmt.Errorf("login field is required")
+	}
+	if uc.Sum == 0 {
+		return fmt.Errorf("password field is required")
+	}
+	return nil
 }
