@@ -251,6 +251,7 @@ func (gh *GophermartHandlers) WithdrawAlsHandler(w http.ResponseWriter, r *http.
 		}
 		render.Status(r, http.StatusInternalServerError)
 		render.PlainText(w, r, "")
+		return
 	}
 
 	render.Status(r, http.StatusOK)
