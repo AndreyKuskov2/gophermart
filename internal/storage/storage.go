@@ -165,7 +165,7 @@ func (db *Postgres) GetPendingOrders() ([]models.Orders, error) {
 	return orders, nil
 }
 
-func (db *Postgres) UpdateOrderStatus(orderNumber, status string, accrual *int) error {
+func (db *Postgres) UpdateOrderStatus(orderNumber, status string, accrual *float32) error {
 	if _, err := db.DB.Exec(db.Ctx, updateOrderStatus, status, accrual, orderNumber); err != nil {
 		return err
 	}

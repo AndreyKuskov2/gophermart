@@ -36,8 +36,8 @@ type Balance struct {
 }
 
 type WithdrawBalanceRequest struct {
-	Order string `json:"order"`
-	Sum   float32    `json:"sum"`
+	Order string  `json:"order"`
+	Sum   float32 `json:"sum"`
 }
 
 func (uc *WithdrawBalanceRequest) Bind(r *http.Request) error {
@@ -54,12 +54,12 @@ type WithdrawBalance struct {
 	ID          int       `json:"-"`
 	UserID      string    `json:"-"`
 	OrderNumber string    `json:"order"`
-	Amount      int       `json:"sum"`
+	Amount      float32   `json:"sum"`
 	ProcessedAt time.Time `json:"processed_at"`
 }
 
 type AccrualResponse struct {
-	Order   string `json:"order"`
-	Status  string `json:"status"`
-	Accrual int    `json:"accrual,omitempty"`
+	Order   string  `json:"order"`
+	Status  string  `json:"status"`
+	Accrual float32 `json:"accrual,omitempty"`
 }

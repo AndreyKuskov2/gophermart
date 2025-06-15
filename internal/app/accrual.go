@@ -15,7 +15,7 @@ import (
 
 type IOrdersStorage interface {
 	GetPendingOrders() ([]models.Orders, error)
-	UpdateOrderStatus(orderNumber, status string, accrual *int) error
+	UpdateOrderStatus(orderNumber, status string, accrual *float32) error
 }
 
 type AccrualProcessor struct {
@@ -116,7 +116,7 @@ func (p *AccrualProcessor) processOrder(ctx context.Context, order models.Orders
 		return
 	}
 
-	var newAccrual *int
+	var newAccrual *float32
 	if response.Status == "PROCESSED" {
 		newAccrual = &response.Accrual
 	}
