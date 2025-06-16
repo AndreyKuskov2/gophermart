@@ -8,6 +8,7 @@ import (
 	"github.com/AndreyKuskov2/gophermart/internal/models"
 	"github.com/AndreyKuskov2/gophermart/pkg/logger"
 	"github.com/AndreyKuskov2/gophermart/pkg/utils"
+	"go.uber.org/zap"
 )
 
 type IGophermartStorage interface {
@@ -44,7 +45,7 @@ func (gs *GophermartService) GetUserService(user models.UserCreditials) (int, er
 
 func (gs *GophermartService) CreateNewOrderService(orderNumber string, userID string) error {
 	if !utils.LuhnAlgorith(orderNumber) {
-		gs.log.Log.Info(ErrNumberIsNotCorrect.Error())
+		gs.log.Log.Info(ErrNumberIsNotCorrect.Error(), zap.String("order_number", orderNumber))
 		return ErrNumberIsNotCorrect
 	}
 
@@ -87,7 +88,7 @@ func (gs *GophermartService) GetUserBalanceService(userID string) (*models.Balan
 
 func (gs *GophermartService) WithdrawBalanceService(userID string, withdrawBalance *models.WithdrawBalanceRequest) error {
 	if !utils.LuhnAlgorith(withdrawBalance.Order) {
-		gs.log.Log.Info(ErrNumberIsNotCorrect.Error())
+		gs.log.Log.Info(ErrNumberIsNotCorrect.Error(), zap.String("order_number", withdrawBalance.Order))
 		return ErrNumberIsNotCorrect
 	}
 

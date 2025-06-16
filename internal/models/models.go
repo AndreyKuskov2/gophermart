@@ -51,11 +51,11 @@ func (uc *WithdrawBalanceRequest) Bind(r *http.Request) error {
 }
 
 type WithdrawBalance struct {
-	ID          int       `json:"withdrawal_id"`
-	UserID      string    `json:"user_id"`
-	OrderNumber string    `json:"order"`
-	Amount      float32   `json:"sum"`
-	ProcessedAt time.Time `json:"processed_at"`
+	WithdrawalID int       `json:"withdrawal_id"`
+	UserID       string    `json:"user_id"`
+	OrderNumber  string    `json:"order"`
+	Amount       float32   `json:"sum"`
+	ProcessedAt  time.Time `json:"processed_at"`
 }
 
 type AccrualResponse struct {

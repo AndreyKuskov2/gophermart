@@ -23,7 +23,7 @@ func NewConfig(log *logger.Logger) (*Config, error) {
 
 	pflag.StringVarP(&cfg.RunAddress, "run-address", "a", "localhost:8000", "run address")
 	pflag.StringVarP(&cfg.DatabaseURI, "database-uri", "d", "", "database uri")
-	pflag.StringVarP(&cfg.AccrualSystemAddress, "accrual-system-address", "r", "localhost:8080", "accrual system address")
+	pflag.StringVarP(&cfg.AccrualSystemAddress, "accrual-system-address", "r", "http://localhost:8080", "accrual system address")
 	pflag.StringVarP(&cfg.JWTSecretToken, "jwt-token", "j", "some-secret-token", "jwt token")
 	pflag.IntVarP(&cfg.UpdateInterval, "update-interval", "i", 10, "update interval in seconds")
 	pflag.IntVarP(&cfg.WorkerCount, "worker-count", "w", 5, "number of workers")
