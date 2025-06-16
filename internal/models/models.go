@@ -32,7 +32,7 @@ type Orders struct {
 
 type Balance struct {
 	Current   float64 `json:"current"`
-	Withdrawn int     `json:"withdrawn"`
+	Withdrawn float32 `json:"withdrawn"`
 }
 
 type WithdrawBalanceRequest struct {
