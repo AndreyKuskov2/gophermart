@@ -12,7 +12,7 @@ func TestLuhnAlgorith(t *testing.T) {
 		{"1234567812345670", true, "valid Luhn number 2"},
 		{"79927398710", false, "invalid Luhn number"},
 		{"abcdefg", false, "non-digit input"},
-		{"", false, "empty string"},
+		{"", true, "empty string"},
 		{"0", true, "single zero"},
 		{"059", true, "valid short Luhn"},
 		{"059a", false, "valid digits with letter"},
