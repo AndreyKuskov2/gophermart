@@ -6,35 +6,6 @@ import (
 	"time"
 )
 
-type UserCreditials struct {
-	Login    string `json:"login"`
-	Password string `json:"password"`
-}
-
-func (uc *UserCreditials) Bind(r *http.Request) error {
-	if uc.Login == "" {
-		return fmt.Errorf("login field is required")
-	}
-	if uc.Password == "" {
-		return fmt.Errorf("password field is required")
-	}
-	return nil
-}
-
-type Orders struct {
-	OrderID    int       `json:"order_id"`
-	Number     string    `json:"number"`
-	Status     string    `json:"status"`
-	Accrual    float32   `json:"accrual"`
-	UploadedAt time.Time `json:"uploaded_at"`
-	UserID     int       `json:"user_id"`
-}
-
-type Balance struct {
-	Current   float64 `json:"current"`
-	Withdrawn float32 `json:"withdrawn"`
-}
-
 type WithdrawBalanceRequest struct {
 	Order string  `json:"order"`
 	Sum   float32 `json:"sum"`

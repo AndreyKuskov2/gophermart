@@ -1,4 +1,4 @@
-package utils
+package validator
 
 func LuhnAlgorith(orderNumber string) bool {
 	var sum int

@@ -22,7 +22,7 @@ func main() {
 		logger.Log.Fatal(err.Error())
 	}
 
-	storage, err := storage.NewPostgres(context.Background(), cfg.DatabaseURI)
+	storage, err := storage.NewPostgres(cfg.DatabaseURI)
 	if err != nil {
 		logger.Log.Fatal(err.Error())
 	}

@@ -13,19 +13,19 @@ import (
 	"go.uber.org/zap"
 )
 
-type IOrdersStorage interface {
-	GetPendingOrders() ([]models.Orders, error)
-	UpdateOrderStatus(orderNumber, status string, accrual *float32) error
+type OrdersStorager interface {
+	GetPendingOrders(ctx context.Context) ([]models.Orders, error)
+	UpdateOrderStatus(ctx context.Context, orderNumber, status string, accrual *float32) error
 }
 
 type AccrualProcessor struct {
-	storage       IOrdersStorage
+	storage       OrdersStorager
 	accrualClient *client.Client
 	Log           *logger.Logger
 	workerCount   int
 }
 
-func NewAccrualProcessor(orderRepository IOrdersStorage, accrualClient *client.Client, log *logger.Logger) *AccrualProcessor {
+func NewAccrualProcessor(orderRepository OrdersStorager, accrualClient *client.Client, log *logger.Logger) *AccrualProcessor {
 	return &AccrualProcessor{
 		storage:       orderRepository,
 		accrualClient: accrualClient,
@@ -48,7 +48,7 @@ func (p *AccrualProcessor) Run(ctx context.Context, interval int, workerCount in
 }
 
 func (p *AccrualProcessor) processPendingOrders(ctx context.Context, workerCount int) {
-	orders, err := p.storage.GetPendingOrders()
+	orders, err := p.storage.GetPendingOrders(ctx)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			p.Log.Log.Info("no pending orders found")
@@ -121,7 +121,7 @@ func (p *AccrualProcessor) processOrder(ctx context.Context, order models.Orders
 		newAccrual = &response.Accrual
 	}
 
-	if err = p.storage.UpdateOrderStatus(order.Number, response.Status, newAccrual); err != nil {
+	if err = p.storage.UpdateOrderStatus(ctx, order.Number, response.Status, newAccrual); err != nil {
 		p.Log.Log.Info("failed to update order accrual", zap.String("order_number", order.Number), zap.Error(err))
 		return
 	}

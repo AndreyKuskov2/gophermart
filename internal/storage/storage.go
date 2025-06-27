@@ -17,17 +17,16 @@ import (
 )
 
 type Postgres struct {
-	DB  *pgxpool.Pool
-	Ctx context.Context
+	DB *pgxpool.Pool
 }
 
-func NewPostgres(ctx context.Context, dbURI string) (*Postgres, error) {
+func NewPostgres(dbURI string) (*Postgres, error) {
 	pool, err := pgxpool.New(context.Background(), dbURI)
 	if err != nil {
 		return nil, fmt.Errorf("cannot initialize db storage: %v", err)
 	}
 
-	if err := pool.Ping(ctx); err != nil {
+	if err := pool.Ping(context.Background()); err != nil {
 		return nil, fmt.Errorf("cannot ping database: %v", err)
 	}
 
@@ -49,34 +48,33 @@ func NewPostgres(ctx context.Context, dbURI string) (*Postgres, error) {
 	}
 
 	return &Postgres{
-		DB:  pool,
-		Ctx: ctx,
+		DB: pool,
 	}, nil
 }
 
-func (db *Postgres) CreateUser(user models.UserCreditials) (int, error) {
+func (db *Postgres) CreateUser(ctx context.Context, user models.UserCreditials) (int, error) {
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(user.Password), 14)
 	if err != nil {
 		return 0, fmt.Errorf("cannot hashing password: %v", err)
 	}
 
 	var userID int
-	if err := db.DB.QueryRow(db.Ctx, checkUserIsExists, user.Login).Scan(&userID); err == nil {
+	if err := db.DB.QueryRow(ctx, checkUserIsExists, user.Login).Scan(&userID); err == nil {
 		return 0, ErrUserIsExist
 	}
 
-	if err := db.DB.QueryRow(db.Ctx, createNewUser, user.Login, string(passwordHash)).Scan(&userID); err != nil {
+	if err := db.DB.QueryRow(ctx, createNewUser, user.Login, string(passwordHash)).Scan(&userID); err != nil {
 		fmt.Println(err)
 		return 0, fmt.Errorf("cannot create user: %v", err)
 	}
 	return userID, nil
 }
 
-func (db *Postgres) GetUserByLogin(user models.UserCreditials) (int, error) {
+func (db *Postgres) GetUserByLogin(ctx context.Context, user models.UserCreditials) (int, error) {
 	var userID int
 	var passwordHash string
 
-	if err := db.DB.QueryRow(db.Ctx, getUserPasswordByLogin, user.Login).Scan(&userID, &passwordHash); err != nil {
+	if err := db.DB.QueryRow(ctx, getUserPasswordByLogin, user.Login).Scan(&userID, &passwordHash); err != nil {
 		return 0, fmt.Errorf("user not found: %v", err)
 	}
 
@@ -87,8 +85,8 @@ func (db *Postgres) GetUserByLogin(user models.UserCreditials) (int, error) {
 	return userID, nil
 }
 
-func (db *Postgres) GetOrderByNumber(orderNumber string) (*models.Orders, error) {
-	rows, err := db.DB.Query(db.Ctx, getOrderByNumber, orderNumber)
+func (db *Postgres) GetOrderByNumber(ctx context.Context, orderNumber string) (*models.Orders, error) {
+	rows, err := db.DB.Query(ctx, getOrderByNumber, orderNumber)
 	if err != nil {
 		return nil, err
 	}
@@ -101,15 +99,15 @@ func (db *Postgres) GetOrderByNumber(orderNumber string) (*models.Orders, error)
 	return &order, nil
 }
 
-func (db *Postgres) CreateNewOrder(order *models.Orders) error {
-	if _, err := db.DB.Exec(db.Ctx, createOrder, order.Number, order.Status, order.Accrual, order.UserID); err != nil {
+func (db *Postgres) CreateNewOrder(ctx context.Context, order *models.Orders) error {
+	if _, err := db.DB.Exec(ctx, createOrder, order.Number, order.Status, order.Accrual, order.UserID); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (db *Postgres) GetOrdersByUserID(userID string) ([]models.Orders, error) {
-	rows, err := db.DB.Query(db.Ctx, getOrdersByUserID, userID)
+func (db *Postgres) GetOrdersByUserID(ctx context.Context, userID string) ([]models.Orders, error) {
+	rows, err := db.DB.Query(ctx, getOrdersByUserID, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -122,23 +120,23 @@ func (db *Postgres) GetOrdersByUserID(userID string) ([]models.Orders, error) {
 	return orders, nil
 }
 
-func (db *Postgres) GetUserBalance(userID string) (*models.Balance, error) {
+func (db *Postgres) GetUserBalance(ctx context.Context, userID string) (*models.Balance, error) {
 	var balance models.Balance
-	if err := db.DB.QueryRow(db.Ctx, getUserBalance, userID, "PROCESSED").Scan(&balance.Current, &balance.Withdrawn); err != nil {
+	if err := db.DB.QueryRow(ctx, getUserBalance, userID, "PROCESSED").Scan(&balance.Current, &balance.Withdrawn); err != nil {
 		return nil, err
 	}
 	return &balance, nil
 }
 
-func (db *Postgres) CreateWithdrawal(withdrawal *models.WithdrawBalance) error {
-	if _, err := db.DB.Exec(db.Ctx, createWithdraw, withdrawal.UserID, withdrawal.OrderNumber, withdrawal.Amount); err != nil {
+func (db *Postgres) CreateWithdrawal(ctx context.Context, withdrawal *models.WithdrawBalance) error {
+	if _, err := db.DB.Exec(ctx, createWithdraw, withdrawal.UserID, withdrawal.OrderNumber, withdrawal.Amount); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (db *Postgres) GetWithdrawalByUserID(userID string) ([]models.WithdrawBalance, error) {
-	rows, err := db.DB.Query(db.Ctx, getWithdrawalByUserID, userID)
+func (db *Postgres) GetWithdrawalByUserID(ctx context.Context, userID string) ([]models.WithdrawBalance, error) {
+	rows, err := db.DB.Query(ctx, getWithdrawalByUserID, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -151,8 +149,8 @@ func (db *Postgres) GetWithdrawalByUserID(userID string) ([]models.WithdrawBalan
 	return withdrawBalance, nil
 }
 
-func (db *Postgres) GetPendingOrders() ([]models.Orders, error) {
-	rows, err := db.DB.Query(db.Ctx, getPendingOrders, "NEW", "PROCESSING")
+func (db *Postgres) GetPendingOrders(ctx context.Context) ([]models.Orders, error) {
+	rows, err := db.DB.Query(ctx, getPendingOrders, "NEW", "PROCESSING")
 	if err != nil {
 		return nil, err
 	}
@@ -165,8 +163,8 @@ func (db *Postgres) GetPendingOrders() ([]models.Orders, error) {
 	return orders, nil
 }
 
-func (db *Postgres) UpdateOrderStatus(orderNumber, status string, accrual *float32) error {
-	if _, err := db.DB.Exec(db.Ctx, updateOrderStatus, status, accrual, orderNumber); err != nil {
+func (db *Postgres) UpdateOrderStatus(ctx context.Context, orderNumber, status string, accrual *float32) error {
+	if _, err := db.DB.Exec(ctx, updateOrderStatus, status, accrual, orderNumber); err != nil {
 		return err
 	}
 	return nil
