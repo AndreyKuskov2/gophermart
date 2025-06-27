@@ -61,6 +61,7 @@ func TestRegisterUserHandler_Success(t *testing.T) {
 	h.RegisterUserHandler(w, req)
 
 	resp := w.Result()
+	defer resp.Body.Close()
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 	assert.NotEmpty(t, resp.Header.Get("Authorization"))
 	mockService.AssertExpectations(t)
@@ -82,6 +83,7 @@ func TestRegisterUserHandler_BadRequest(t *testing.T) {
 	h.RegisterUserHandler(w, req)
 
 	resp := w.Result()
+	defer resp.Body.Close()
 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
 }
 
@@ -102,6 +104,7 @@ func TestRegisterUserHandler_Conflict(t *testing.T) {
 	h.RegisterUserHandler(w, req)
 
 	resp := w.Result()
+	defer resp.Body.Close()
 	assert.Equal(t, http.StatusConflict, resp.StatusCode)
 	mockService.AssertExpectations(t)
 }
@@ -123,6 +126,7 @@ func TestRegisterUserHandler_InternalServerError_Service(t *testing.T) {
 	h.RegisterUserHandler(w, req)
 
 	resp := w.Result()
+	defer resp.Body.Close()
 	assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
 	mockService.AssertExpectations(t)
 }
@@ -144,6 +148,7 @@ func TestLoginUserHandler_Success(t *testing.T) {
 	h.LoginUserHandler(w, req)
 
 	resp := w.Result()
+	defer resp.Body.Close()
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 	assert.NotEmpty(t, resp.Header.Get("Authorization"))
 	mockService.AssertExpectations(t)
@@ -164,6 +169,7 @@ func TestLoginUserHandler_BadRequest(t *testing.T) {
 	h.LoginUserHandler(w, req)
 
 	resp := w.Result()
+	defer resp.Body.Close()
 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
 }
 
@@ -184,6 +190,7 @@ func TestLoginUserHandler_Unauthorized(t *testing.T) {
 	h.LoginUserHandler(w, req)
 
 	resp := w.Result()
+	defer resp.Body.Close()
 	assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
 	mockService.AssertExpectations(t)
 }
@@ -205,6 +212,7 @@ func TestLoginUserHandler_Unauthorized_InvalidData(t *testing.T) {
 	h.LoginUserHandler(w, req)
 
 	resp := w.Result()
+	defer resp.Body.Close()
 	assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
 	mockService.AssertExpectations(t)
 }
@@ -226,6 +234,7 @@ func TestLoginUserHandler_InternalServerError_Service(t *testing.T) {
 	h.LoginUserHandler(w, req)
 
 	resp := w.Result()
+	defer resp.Body.Close()
 	assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
 	mockService.AssertExpectations(t)
 }

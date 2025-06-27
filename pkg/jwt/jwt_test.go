@@ -13,6 +13,11 @@ import (
 
 const testSecretKey = "test-secret-key"
 
+// contextKey is a custom type for context keys to avoid collisions
+type contextKey string
+
+const claimsContextKey contextKey = "claims"
+
 func TestCreateJwtToken(t *testing.T) {
 	userID := 123
 
@@ -129,7 +134,7 @@ func TestGetJwtClaims(t *testing.T) {
 		t.Fatalf("Failed to create test request: %v", err)
 	}
 
-	ctx := context.WithValue(req.Context(), "claims", testClaims)
+	ctx := context.WithValue(req.Context(), claimsContextKey, testClaims)
 	req = req.WithContext(ctx)
 
 	claims, err := GetJwtClaims(req)
@@ -156,7 +161,7 @@ func TestGetJwtClaims(t *testing.T) {
 		t.Fatalf("Failed to create test request: %v", err)
 	}
 
-	ctxWrongType := context.WithValue(reqWrongType.Context(), "claims", "not-a-claim")
+	ctxWrongType := context.WithValue(reqWrongType.Context(), claimsContextKey, "not-a-claim")
 	reqWrongType = reqWrongType.WithContext(ctxWrongType)
 
 	_, err = GetJwtClaims(reqWrongType)
